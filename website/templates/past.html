@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<h1>Your Previous Code Snippets</h1>
+<hr>
+
+{% if code %}
+ {% for snippet in code %}
+<button type="button" class="btn btn-primary position-relative">
+{{ snippet.language }}
+</button>
+<br />
+<br />
+<div class="alert alert-info" role="alert">
+  Your Question: {{ snippet.question }}
+</div>
+<pre>
+<code class="language-{{ snippet.language }} line-numbers">
+{{ snippet.code_response }}
+
+</code>
+</pre>
+<a class="btn btn-danger" href="{% url 'delete_snippet' snippet.id %}">Delete Snippet</a>
+<hr />
+ {% endfor %}
+{% else %}
+<div class="alert alert-primary" role="alert">
+  You don't have any previous code snippets saved!
+</div>
+{% endif %}
+{% endblock %}

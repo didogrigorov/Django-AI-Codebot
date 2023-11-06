@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+
+<h1 class="text-center">Register</h1>
+<br />
+
+<div class="col-md-6 offset-md-3">
+    <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <div>
+            {% for field in form %}
+                {% if field.errors %}
+                    {{ field.errors }}
+                {% endif %}
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {{ form.as_p }}
+        <input type="submit" value="Register" class="btn btn-primary">
+    </form>
+</div>
+
+{% endblock %}
