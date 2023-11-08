@@ -24,7 +24,7 @@ def home(request):
             return render(request, 'home.html', {"lang_list": languages, "code": code, "lang": lang})
         else:
             # OpenAI Key
-            openai.api_key = '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'
+            openai.api_key = os.getenv('OPENAI_API_KEY')
             # OpenAI Instance
             openai.Model.list()
 
