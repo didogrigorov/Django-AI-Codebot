@@ -5,9 +5,9 @@
 
 {% if code %}
  {% for snippet in code %}
-<button type="button" class="btn btn-primary position-relative">
-{{ snippet.language }}
-</button>
+
+         <button type="submit" class="btn btn-primary position-relative">{{ snippet.language }}</button>
+
 <br />
 <br />
 <div class="alert alert-info" role="alert">
@@ -19,7 +19,10 @@
 
 </code>
 </pre>
-<a class="btn btn-danger" href="{% url 'delete_snippet' snippet.id %}">Delete Snippet</a>
+<form method="POST" action="{% url 'delete_snippet' snippet.id %}">
+{%  csrf_token %}
+<button class="btn btn-danger" type="submit">Delete Snippet</button>
+</form>
 <hr />
  {% endfor %}
 {% else %}

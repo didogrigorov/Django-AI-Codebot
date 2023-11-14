@@ -1,9 +1,14 @@
 import os
 from django.contrib import messages
+from django.contrib.auth.views import LoginView, LogoutView
+from django.http import request
 from django.shortcuts import render, redirect
 import openai
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+from django.views import generic
+from django.views.generic import DeleteView
+
 from .forms import SignUpForm
 from .models import Code
 
@@ -101,46 +106,24 @@ def code_suggest(request):
     return render(request, 'suggest.html', {"lang_list": languages})
 
 
-def login_user(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+# User Login CBV
+class CustomLoginView(LoginView):
+    template_name = 'home.html'
+    success_url = reverse_lazy('website:home')
 
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Great! You have been logged in!")
-            return redirect('home')
-        else:
-            messages.success(request, "Wrong username or password! Please try again!")
-            return redirect('home')
-    else:
-        return render(request, 'home.html', {})
+    def form_valid(self, form):
+        messages.success(self.request, "You have been loggedin successfully!")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password. Please try again.")
+        return self.render_to_response(self.get_context_data(form=form))
 
 
-def logout_user(request):
-    logout(request)
-    messages.success(request, "You have been successfully logged out! Have a nice day!")
-    return redirect('home')
-
-
-def register_user(request):
-    if request.method == "POST":
-        form = SignUpForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            messages.success(request, "You have successfully registered!")
-            return redirect('home')
-
-    else:
-        form = SignUpForm
-
-    return render(request, 'register.html', {"form": form})
+class SignUpView(generic.CreateView):
+    form_class = SignUpForm
+    success_url = "home"
+    template_name = 'register.html'
 
 
 def past_code(request):
@@ -152,8 +135,14 @@ def past_code(request):
         return redirect('home')
 
 
-def delete_snippet(request, id):
-    previous = Code.objects.get(pk=id)
-    previous.delete()
-    messages.success(request, "Deleted Successfully!")
-    return redirect('past_code')
+class DeleteCodeView(DeleteView):
+    model = Code
+    success_url = reverse_lazy('past_code')
+    template_name = "past.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data()
+        code = Code.objects.filter(user_id=self.request.user.id)
+        context["code"] = code
+        messages.success(request, "Deleted Successfully!")
+        return context
