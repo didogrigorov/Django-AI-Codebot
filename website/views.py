@@ -1,83 +1,116 @@
-import os
 from django.contrib import messages
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.http import request
 from django.shortcuts import render, redirect
-import openai
-from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse_lazy
-from django.views import generic
-from django.views.generic import DeleteView
-
-from .forms import SignUpForm
+from django.views import generic, View
+from django.views.generic import DeleteView, ListView, FormView, DetailView
+from .forms import SignUpForm, OpenAIForm
 from .models import Code
+import openai
 
 
-# Create your views here.
-def home(request):
-    languages = ['C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
-                 'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb', 'Objective-C',
-                 'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala', 'Scss', 'SQL', 'Swift',
-                 'TSX', 'Typescript']
+class HomeView(FormView):
+    template_name = 'home.html'
+    form_class = OpenAIForm
+    success_url = reverse_lazy('home')
 
-    if request.method == "POST":
-        code = request.POST['code']
-        lang = request.POST['lang']
+    def form_valid(self, form):
+        user_request = form.cleaned_data['user_request']
+        language_selection = form.cleaned_data['language_selection']
+        print(language_selection)
 
-        # Check if lang is empty
+        openai.api_key = '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'
+
+        try:
+            response = openai.Completion.create(
+                model='gpt-3.5-turbo-instruct',
+                prompt=f"Respond only with code. Fix this {language_selection} code: {user_request}",
+                temperature=0,
+                max_tokens=2000,
+                top_p=1.0,
+                frequency_penalty=0.0,
+                presence_penalty=0.0
+            )
+            code_generated = (response['choices'][0]['text']).strip()
+        except Exception as e:
+            code_generated = f"Error generating code: {str(e)}"
+
+        record = Code(question=user_request, code_response=code_generated, language=language_selection,
+                      user=self.request.user)
+        record.save()
+
+        context = self.get_context_data(form=form, code_generated=code_generated, language=language_selection)
+
+        return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Hey! You Forgot to Pick a Programming Language!")
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+    # def post(self, request, *args, **kwargs):
+    #     languages = ['C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
+    #                  'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb', 'Objective-C',
+    #                  'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala', 'Scss', 'SQL',
+    #                  'Swift',
+    #                  'TSX', 'Typescript']
+    #
+    #     code = request.POST.get('code', '')
+    #     lang = request.POST.get('lang', '')
+    #
+    #     if lang == "Select Programming Language":
+    #         messages.success(request, "Hey! You Forgot to Pick a Programming Language!")
+    #         return render(request, self.template_name, {"lang_list": languages, "code": code, "lang": lang})
+    #     else:
+    #         openai.api_key = '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'
+    #         openai.Model.list()
+    #
+    #         try:
+    #             response = openai.Completion.create(
+    #                 model='gpt-3.5-turbo-instruct',
+    #                 prompt=f"Respond only with code. Fix this {lang} code: {code}",
+    #                 temperature=0,
+    #                 max_tokens=2000,
+    #                 top_p=1.0,
+    #                 frequency_penalty=0.0,
+    #                 presence_penalty=0.0
+    #             )
+    #             response = (response['choices'][0]['text']).strip()
+    #
+    #             record = Code(question=code, code_response=response, language=lang, user=request.user)
+    #             record.save()
+    #
+    #             return render(request, self.template_name, {"lang_list": languages, "response": response, "lang": lang})
+    #         except Exception as e:
+    #             return render(request, self.template_name, {"lang_list": languages, "code": e, "lang": lang})
+
+
+class CodeSuggestView(View):
+    template_name = 'suggest.html'
+
+    def get(self, request):
+        languages = ['C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
+                     'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb',
+                     'Objective-C', 'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala',
+                     'Scss', 'SQL', 'Swift', 'TSX', 'Typescript']
+        return render(request, self.template_name, {"lang_list": languages})
+
+    def post(self, request):
+        languages = ['C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
+                     'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb',
+                     'Objective-C', 'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala',
+                     'Scss', 'SQL', 'Swift', 'TSX', 'Typescript']
+
+        code = request.POST.get('code', '')
+        lang = request.POST.get('lang', '')
+
         if lang == "Select Programming Language":
             messages.success(request, "Hey! You Forgot to Pick a Programming Language!")
-            return render(request, 'home.html', {"lang_list": languages, "code": code, "lang": lang})
+            return render(request, self.template_name, {"lang_list": languages, "code": code, "lang": lang})
         else:
-            # OpenAI Key
-            openai.api_key = os.getenv('OPENAI_API_KEY')
-            # OpenAI Instance
-            openai.Model.list()
-
-            try:
-                response = openai.Completion.create(
-                    model='gpt-3.5-turbo-instruct',
-                    prompt=f"Respond only with code. Fix this {lang} code: {code}",
-                    temperature=0,
-                    max_tokens=2000,
-                    top_p=1.0,
-                    frequency_penalty=0.0,
-                    presence_penalty=0.0
-
-                )
-                # Response Parsing
-                response = (response['choices'][0]['text']).strip()
-                # Save a snippet to the database
-                record = Code(question=code, code_response=response, language=lang, user=request.user)
-                record.save()
-                return render(request, 'home.html', {"lang_list": languages, "response": response, "lang": lang})
-
-            except Exception as e:
-                return render(request, 'home.html', {"lang_list": languages, "code": e, "lang": lang})
-
-        # return render(request, 'home.html', {"lang_list": languages, "code": code, "lang": lang})
-
-    return render(request, 'home.html', {"lang_list": languages})
-
-
-def code_suggest(request):
-    languages = ['C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
-                 'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb', 'Objective-C',
-                 'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala', 'Scss', 'SQL', 'Swift',
-                 'TSX', 'Typescript']
-
-    if request.method == "POST":
-        code = request.POST['code']
-        lang = request.POST['lang']
-
-        # Check if lang is empty
-        if lang == "Select Programming Language":
-            messages.success(request, "Hey! You Forgot to Pick a Programming Language!")
-            return render(request, 'suggest.html', {"lang_list": languages, "code": code, "lang": lang})
-        else:
-            # OpenAI Key
-            openai.api_key = os.getenv('OPENAI_API_KEY')
-            # OpenAI Instance
+            openai.api_key = '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'
             openai.Model.list()
 
             try:
@@ -89,21 +122,15 @@ def code_suggest(request):
                     top_p=1.0,
                     frequency_penalty=0.0,
                     presence_penalty=0.0
-
                 )
-                # Response Parsing
+
                 response = (response['choices'][0]['text']).strip()
-                # Save to database
                 record = Code(question=code, code_response=response, language=lang, user=request.user)
                 record.save()
-                return render(request, 'suggest.html', {"lang_list": languages, "response": response, "lang": lang})
+                return render(request, self.template_name, {"lang_list": languages, "response": response, "lang": lang})
 
             except Exception as e:
-                return render(request, 'suggest.html', {"lang_list": languages, "code": e, "lang": lang})
-
-        # return render(request, 'suggest.html', {"lang_list": languages, "code": code, "lang": lang})
-
-    return render(request, 'suggest.html', {"lang_list": languages})
+                return render(request, self.template_name, {"lang_list": languages, "code": e, "lang": lang})
 
 
 # User Login CBV
@@ -126,13 +153,13 @@ class SignUpView(generic.CreateView):
     template_name = 'register.html'
 
 
-def past_code(request):
-    if request.user.is_authenticated:
-        code = Code.objects.filter(user_id=request.user.id)
-        return render(request, 'past.html', {"code": code})
-    else:
-        messages.success(request, "You Must Be Logged To View This Page!")
-        return redirect('home')
+class PastCodeView(LoginRequiredMixin, ListView):
+    template_name = 'past.html'
+    model = Code
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(PastCodeView, self).get_queryset(*args, **kwargs)
+        return qs.filter(user_id=self.request.user.id).order_by("-id")
 
 
 class DeleteCodeView(DeleteView):

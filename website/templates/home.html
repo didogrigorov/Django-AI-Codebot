@@ -1,33 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-{% if user.is_authenticated %}
-
-{% if response %}
+{% if code_generated %}
 <pre>
-<code class="language-{{lang}} line-numbers">
-{{response}}
-
+<code class="language-{{ form.language_selection.value }} line-numbers">
+{{code_generated}}
 </code>
 </pre>
+
 <br />
-<form method="POST" action="{% url 'home' %}">
+<form method="POST">
     {% csrf_token %}
-<div class="mb-3">
-  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="code" placeholder="Paste the code to be fixed...">{{code}}</textarea>
-</div>
-    <select class="form-select" name="lang">
-      <option selected>Select Programming Language</option>
-        {% for lang in lang_list %}
-      <option value="{{lang}}">{{lang}}</option>
-        {% endfor %}
-    </select>
-    <br />
+    {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-{% else %}
+{% elif user.is_authenticated %}
 <pre>
 <code class="language-python line-numbers">
 print("Enter your code to show up here!")
@@ -36,19 +24,10 @@ print("Enter your code to show up here!")
 <br />
 <form method="POST" action="{% url 'home' %}">
     {% csrf_token %}
-<div class="mb-3">
-  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="code" placeholder="Paste the code to be fixed..."></textarea>
-</div>
-    <select class="form-select" name="lang">
-      <option selected>Select Programming Language</option>
-        {% for lang in lang_list %}
-      <option value="{{lang}}">{{lang}}</option>
-        {% endfor %}
-    </select>
+    {{ form.as_p }}
     <br />
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-{% endif %}
 
 {% else %}
 <div class="col-md-6 offset-md-3">
@@ -70,6 +49,6 @@ print("Enter your code to show up here!")
     <div class="alert alert-primary" role="alert">
         If you don't have an account, please <a href="{% url 'register' %}">register</a> to use the bot!
     </div>
+</div>
 {% endif %}
 {% endblock %}
-

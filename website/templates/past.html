@@ -3,8 +3,8 @@
 <h1>Your Previous Code Snippets</h1>
 <hr>
 
-{% if code %}
- {% for snippet in code %}
+{% if object_list %}
+ {% for snippet in object_list %}
 
          <button type="submit" class="btn btn-primary position-relative">{{ snippet.language }}</button>
 
