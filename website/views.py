@@ -9,6 +9,7 @@ from django.views.generic import DeleteView, ListView, FormView, DetailView
 from .forms import SignUpForm, OpenAIForm
 from .models import Code
 import openai
+import os
 
 
 class HomeView(FormView):
@@ -21,7 +22,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = os.environ.get('OPENAI_API_KEY')
 
         try:
             response = openai.Completion.create(
