@@ -1,3 +1,5 @@
+import os
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -22,7 +24,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
         try:
             response = openai.Completion.create(
@@ -59,7 +61,7 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
         try:
             response = openai.Completion.create(
