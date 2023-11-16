@@ -88,8 +88,6 @@ class SuggestCodeView(FormView):
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
 
-
-# User Login CBV
 class CustomLoginView(LoginView):
     template_name = 'home.html'
     success_url = reverse_lazy('website:home')
@@ -105,7 +103,7 @@ class CustomLoginView(LoginView):
 
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
-    success_url = "home"
+    success_url = reverse_lazy('home')
     template_name = 'register.html'
 
 
