@@ -22,7 +22,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv('OpenAI_API_Key')
+        openai.api_key = os.getenv('OPENAI_API_KEY')
 
         try:
             response = openai.Completion.create(
@@ -59,7 +59,7 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv('OpenAI_API_Key')
+        openai.api_key = os.getenv('OPENAI_API_KEY')
 
         try:
             response = openai.Completion.create(
