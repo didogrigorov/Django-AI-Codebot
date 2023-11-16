@@ -2,10 +2,12 @@ from django.contrib.auth.forms import UserCreationForm
 
 from django.contrib.auth.models import User
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class OpenAIForm(forms.Form):
-    languages = ['Select Your Language', 'C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go', 'HTML', 'Java',
+    languages = ['Select Your Language', 'C', 'Clike', 'CoffeeScript', 'cpp', 'Csharp', 'CSS', 'Dart', 'Django', 'Go',
+                 'HTML', 'Java',
                  'Javascript', 'JSX', 'Markdown', 'Markup', 'Markup-templating', 'Matlab', 'Mongodb', 'Objective-C',
                  'Perl', 'PHP', 'Powershell', 'Python', 'R', 'Ruby', 'Rust', 'Sass', 'Scala', 'Scss', 'SQL',
                  'Swift',
@@ -13,8 +15,25 @@ class OpenAIForm(forms.Form):
 
     LANGUAGE_CHOICES = [(lang, lang) for lang in languages]
 
-    user_request = forms.CharField(label = "", widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter Your Query...'}))
-    language_selection = forms.ChoiceField(label="", choices=LANGUAGE_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}))
+    user_request = forms.CharField(label="", widget=forms.Textarea(
+        attrs={'class': 'form-control', 'placeholder': 'Enter Your Query...'}))
+
+    language_selection = forms.ChoiceField(label="", choices=LANGUAGE_CHOICES,
+                                           widget=forms.Select(attrs={'class': 'form-select'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        language_selection = cleaned_data.get('language_selection')
+
+        # Check if there are existing errors for the 'language_selection' field
+        if 'language_selection' in self._errors:
+            return cleaned_data  # Skip further validation if there are errors
+
+        if language_selection == 'Select Your Language':
+            raise ValidationError("Hey! You forgot to pick a programming language!")
+
+        return cleaned_data
+
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(label="", widget=forms.TextInput(

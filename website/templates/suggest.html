@@ -1,52 +1,74 @@
 {% extends 'base.html' %}
 {% block content %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+      {% for error in form.non_field_errors %}
+        {{ error }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% for hidden_field in form.hidden_fields %}
+        {{ hidden_field.errors }}
+        {{ hidden_field }}
+{% endfor %}
 
-{% if user.is_authenticated %}
-{% if response %}
+{% if code_generated %}
 <pre>
-<code class="language-{{lang}} line-numbers">
-{{response}}
-
+<code class="language-{{ form.language_selection.value }} line-numbers">
+{{code_generated}}
 </code>
 </pre>
+
 <br />
-<form method="POST" action="{% url 'home' %}">
-    {% csrf_token %}
-<div class="mb-3">
-  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="code" placeholder="Write your code prompt for the AI here...">{{code}}</textarea>
-</div>
-    <select class="form-select" name="lang">
-      <option selected>Select Programming Language</option>
-        {% for lang in lang_list %}
-      <option value="{{lang}}">{{lang}}</option>
-        {% endfor %}
-    </select>
-    <br />
+<form method="POST" novalidate>
+     {% csrf_token %}
+
+    {% for field in form.visible_fields %}
+      <div class="form-group">
+        {{ field.label_tag }}
+          {% if field.errors %}
+              {% for error in field.errors %}
+          <div class="alert alert-danger" role="alert">
+          {{ error }}
+          </div>
+          {% endfor %}
+          {% endif %}
+          {{ field }}
+          {{ field.help_text }}
+      </div>
+    {% endfor %}
+<br />
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-{% else %}
+{% elif user.is_authenticated %}
 <pre>
 <code class="language-python line-numbers">
-Enter What Do You Want To Do With Code...
+print("Enter your code to show up here!")
 </code>
 </pre>
 <br />
-<form method="POST" action="{% url 'home' %}">
-    {% csrf_token %}
-<div class="mb-3">
-  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="code" placeholder="Write your code prompt for the AI here..."></textarea>
-</div>
-    <select class="form-select" name="lang">
-      <option selected>Select Programming Language</option>
-        {% for lang in lang_list %}
-      <option value="{{lang}}">{{lang}}</option>
-        {% endfor %}
-    </select>
-    <br />
+<form method="POST" novalidate>
+     {% csrf_token %}
+
+    {% for field in form.visible_fields %}
+      <div class="form-group">
+        {{ field.label_tag }}
+          {% if field.errors %}
+          {% for error in field.errors %}
+          <div class="alert alert-danger" role="alert">
+          {{ error }}
+          {% endfor %}
+          </div>
+          {% endif %}
+          {{ field }}
+          {{ field.help_text }}
+      </div>
+    {% endfor %}
+<br />
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-{% endif %}
+
 {% else %}
 <div class="col-md-6 offset-md-3">
     <h1>Login To The CodeAI Bot</h1>
@@ -67,5 +89,6 @@ Enter What Do You Want To Do With Code...
     <div class="alert alert-primary" role="alert">
         If you don't have an account, please <a href="{% url 'register' %}">register</a> to use the bot!
     </div>
+</div>
 {% endif %}
 {% endblock %}
