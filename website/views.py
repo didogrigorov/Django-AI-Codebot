@@ -9,6 +9,7 @@ from django.views.generic import DeleteView, ListView, FormView
 from .forms import SignUpForm, OpenAIForm
 from .models import Code
 import openai
+import os
 
 
 class HomeView(FormView):
