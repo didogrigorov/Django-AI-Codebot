@@ -1,14 +1,11 @@
-import os
-
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import NON_FIELD_ERRORS
 from django.http import request
-from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views import generic, View
-from django.views.generic import DeleteView, ListView, FormView, DetailView
+from django.views import generic
+from django.views.generic import DeleteView, ListView, FormView
 from .forms import SignUpForm, OpenAIForm
 from .models import Code
 import openai
@@ -24,7 +21,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = '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'
 
         try:
             response = openai.Completion.create(
@@ -61,7 +58,7 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = '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'
 
         try:
             response = openai.Completion.create(
@@ -105,8 +102,13 @@ class CustomLoginView(LoginView):
 
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
-    success_url = "home"
+    success_url = reverse_lazy('home')
     template_name = 'register.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        return response
 
 
 class PastCodeView(LoginRequiredMixin, ListView):
