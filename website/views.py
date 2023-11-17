@@ -1,3 +1,5 @@
+import os
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,7 +23,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = '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'
 
         try:
             response = openai.Completion.create(
@@ -48,6 +50,7 @@ class HomeView(FormView):
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
 
+
 class SuggestCodeView(FormView):
     template_name = 'suggest.html'
     form_class = OpenAIForm
@@ -58,7 +61,7 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = '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'
 
         try:
             response = openai.Completion.create(
@@ -84,6 +87,7 @@ class SuggestCodeView(FormView):
 
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
+
 
 class CustomLoginView(LoginView):
     template_name = 'home.html'
