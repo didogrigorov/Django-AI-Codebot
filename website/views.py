@@ -11,7 +11,7 @@ from django.views.generic import DeleteView, ListView, FormView
 from .forms import SignUpForm, OpenAIForm
 from .models import Code
 import openai
-
+import os
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -23,7 +23,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = os.getenv('OPENAI_API_KEY')
 
         try:
             response = openai.Completion.create(
@@ -61,7 +61,7 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = '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'
+        openai.api_key = os.getenv('OPENAI_API_KEY')
 
         try:
             response = openai.Completion.create(
