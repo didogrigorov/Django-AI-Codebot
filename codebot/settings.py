@@ -135,3 +135,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = reverse_lazy('home')
 LOGOUT_REDIRECT_URL = reverse_lazy('home')
+
+# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+# EMAIL_FILE_PATH = "emails"
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_PORT = 25
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'codebotaiproject@gmail.com'
+EMAIL_HOST_PASSWORD = 'mlaugekuwpfmjstq'
