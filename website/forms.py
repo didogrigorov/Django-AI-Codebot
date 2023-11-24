@@ -36,7 +36,8 @@ class OpenAIForm(forms.Form):
 
 
 class SignUpForm(UserCreationForm):
-    email = forms.EmailField(label="", widget=forms.TextInput(
+    email = forms.EmailField(
+        label="", widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Email Address...'}), )
 
     first_name = forms.CharField(label="", max_length=100,
