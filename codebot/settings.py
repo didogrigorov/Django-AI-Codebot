@@ -142,3 +142,4 @@ EMAIL_HOST_PORT = 25
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'codebotaiproject@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv('reset_email')
+EMAIL_HOST_PASSWORD = os.getenv('reset_email')
