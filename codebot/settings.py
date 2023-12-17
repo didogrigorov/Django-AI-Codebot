@@ -13,11 +13,18 @@ import os
 from pathlib import Path
 
 from django.urls import reverse_lazy
-import os
+import environ
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+DEBUG = True
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -143,3 +150,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'codebotaiproject@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv('reset_email')
 EMAIL_HOST_PASSWORD = os.getenv('reset_email')
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

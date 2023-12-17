@@ -66,3 +66,5 @@ class OpenAIFormTest(TestCase):
         self.assertIn("user_request", form.errors)
         self.assertIn("This field is required.", form.errors["user_request"])
         self.assertFalse(form.is_valid())
+
+

@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -23,7 +24,7 @@ class HomeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv('OPENAI_API_KEY')
+        openai.api_key = settings.OPENAI_API_KEY
 
         try:
             response = openai.Completion.create(
@@ -61,7 +62,8 @@ class SuggestCodeView(FormView):
         language_selection = form.cleaned_data['language_selection']
         print(language_selection)
 
-        openai.api_key = os.getenv('OPENAI_API_KEY')
+        openai.api_key = settings.OPENAI_API_KEY
+        print(openai.api_key)
 
         try:
             response = openai.Completion.create(
@@ -133,3 +135,5 @@ class DeleteCodeView(DeleteView):
         context["code"] = code
         messages.success(request, "Deleted Successfully!")
         return context
+
+
